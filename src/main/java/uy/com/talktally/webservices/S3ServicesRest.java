@@ -12,14 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
-import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
 import uy.com.talktally.aws.AWSCredentialsManager;
 import uy.com.talktally.entities.ServiceError;
 import uy.com.talktally.results.ResultListS3Buckets;
 import uy.com.talktally.results.ResultSaveMeetingToS3;
+import uy.com.talktally.utils.S3Utils;
 
 @RestController
 @RequestMapping("/S3ServiceRest")
@@ -47,7 +46,7 @@ public class S3ServicesRest implements Serializable {
 			serviceError.setErrorCode(100);
 			serviceError.setErrorDescription("You don't have any buckets");
 			result.setServiceError(serviceError);
-		}else {
+		} else {
 			serviceError.setError(Boolean.FALSE);
 			result.setoKMessage("Buckets listed successfully");
 		}
@@ -62,7 +61,7 @@ public class S3ServicesRest implements Serializable {
 		try {
 			String fileName = file.getOriginalFilename();
 			// Check if the bucket exists, create it if it doesn't
-			if (!bucketExists(BUCKET_NAME)) {
+			if (!S3Utils.bucketExists(BUCKET_NAME)) {
 				s3Client.createBucket(CreateBucketRequest.builder().bucket(BUCKET_NAME).build());
 			}
 
@@ -80,20 +79,6 @@ public class S3ServicesRest implements Serializable {
 		}
 
 		return result;
-	}
-
-	private boolean bucketExists(String bucketName) {
-		S3Client s3Client = credentialsManager.createS3Client();
-		HeadBucketRequest request = HeadBucketRequest.builder().bucket(bucketName).build();
-		try {
-			s3Client.headBucket(request);
-			return true;
-		} catch (S3Exception e) {
-			if (e.statusCode() == 404) {
-				return false;
-			}
-			throw e;
-		}
 	}
 
 	public AWSCredentialsManager getCredentialsManager() {
