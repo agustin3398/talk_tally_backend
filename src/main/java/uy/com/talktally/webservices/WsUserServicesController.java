@@ -39,8 +39,8 @@ import uy.com.talktally.results.ResultSignUp;
 import uy.com.talktally.utils.UsersUtils;
 
 @RestController
-@RequestMapping("/UserServicesRest")
-public class UserServicesRest implements Serializable {
+@RequestMapping("/api/WsUserServices")
+public class WsUserServicesController implements Serializable {
 
 	/**
 	 * 

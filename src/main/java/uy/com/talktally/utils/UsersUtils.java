@@ -61,5 +61,19 @@ public class UsersUtils implements Serializable {
 
 		return false;
 	}
+	
+	public static String getUserCognitoId(String username) {
+		CognitoIdentityProviderClient cognitoClient = credentialsManager.createCognitoClient();
+		
+		AdminGetUserRequest adminGetUserRequest = AdminGetUserRequest.builder()
+				.userPoolId(credentialsManager.loadUserPoolId()).username(username).build();
+	    
+		AdminGetUserResponse adminGetUserResponse = cognitoClient.adminGetUser(adminGetUserRequest);
+	    return adminGetUserResponse.userAttributes().stream()
+	            .filter(attr -> "sub".equals(attr.name())) // "sub" is the attribute name for Cognito ID
+	            .findFirst()
+	            .map(attr -> attr.value())
+	            .orElse(null);
+	}
 
 }
